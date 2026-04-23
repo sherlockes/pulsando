@@ -1,13 +1,13 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import {
-    getFirestore,
-    doc,
+import { 
+    getFirestore, 
+    doc, 
     getDoc,
     updateDoc,
-    onSnapshot,
+    onSnapshot, 
     runTransaction,
     collection,
-    serverTimestamp
+    serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 
@@ -44,7 +44,7 @@ document.getElementById('btn-join-session').onclick = async () => {
     try {
         const sessionRef = doc(db, "sessions", code);
         const sessionSnap = await getDoc(sessionRef);
-
+        
         if (!sessionSnap.exists()) throw "SESSION_NOT_FOUND";
         if (sessionSnap.data().locked) throw "SESSION_LOCKED";
         if (sessionSnap.data().className.toLowerCase() !== className.toLowerCase()) throw "CLASS_NAME_MISMATCH";
@@ -65,7 +65,7 @@ document.getElementById('btn-join-session').onclick = async () => {
             transaction.set(studentRef, {
                 name: name,
                 joinedAt: serverTimestamp(),
-                penalty: false // Por defecto sin penalización
+                penalty: false
             });
 
             document.getElementById('student-display-class').innerText = data.className;
@@ -88,16 +88,15 @@ document.getElementById('btn-join-session').onclick = async () => {
 };
 
 function startKickListener(sessionId, studentName) {
-    if (studentDocListener) studentDocListener();
+    if (studentDocListener) studentDocListener(); 
     const studentRef = doc(db, "sessions", sessionId, "students", studentName);
-
+    
     studentDocListener = onSnapshot(studentRef, (docSnap) => {
         if (!docSnap.exists() && currentSessionId) {
             currentSessionId = null;
             alert("Has sido expulsado.");
-            window.location.reload();
+            window.location.reload(); 
         } else if (docSnap.exists()) {
-            // Actualizamos si tenemos penalización por respuesta incorrecta
             hasUserPenalty = docSnap.data().penalty || false;
         }
     });
@@ -107,12 +106,11 @@ function startKickListener(sessionId, studentName) {
 document.getElementById('buzzer-button').onclick = async () => {
     if (!currentSessionId || penaltyActive) return;
 
-    // Si el botón está en "modo retraso" (penalizado), no hace nada hasta que pase el tiempo
     const btn = document.getElementById('buzzer-button');
     if (hasUserPenalty && !btn.classList.contains('active')) return;
 
     const sessionRef = doc(db, "sessions", currentSessionId);
-
+    
     try {
         const docSnap = await getDoc(sessionRef);
         const data = docSnap.data();
@@ -125,14 +123,13 @@ document.getElementById('buzzer-button').onclick = async () => {
         await runTransaction(db, async (transaction) => {
             const tDoc = await transaction.get(sessionRef);
             const tData = tDoc.data();
-
+            
             if (tData.active && !tData.winner) {
                 transaction.update(sessionRef, {
                     winner: { name: currentStudentName, timestamp: serverTimestamp() },
                     active: false
                 });
-
-                // Limpiamos nuestra penalización al pulsar (ya la hemos "cumplido")
+                
                 const studentRef = doc(db, "sessions", currentSessionId, "students", currentStudentName);
                 transaction.update(studentRef, { penalty: false });
             }
@@ -147,10 +144,10 @@ async function applyPenalty() {
     const btn = document.getElementById('buzzer-button');
     const badge = document.getElementById('student-status-badge');
     const penaltyTime = Math.floor(Math.random() * 4000) + 1000;
-
+    
     btn.classList.add('penalty');
     badge.innerText = "¡BLOQUEADO POR ANSIA!";
-
+    
     setTimeout(async () => {
         penaltyActive = false;
         btn.classList.remove('penalty');
@@ -177,11 +174,10 @@ function updateUI(data) {
 
     if (data.active) {
         if (hasUserPenalty) {
-            // RETRASO DE 1 SEGUNDO POR PENALIZACIÓN PREVIA
             statusBadge.innerText = "ESPERA... (PENALIZADO ⚡)";
             statusBadge.className = "status-badge status-waiting";
             buzzerBtn.classList.remove('active');
-
+            
             setTimeout(() => {
                 if (data.active && !penaltyActive && hasUserPenalty) {
                     statusBadge.innerText = "¡DALE YA!";

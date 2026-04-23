@@ -1,6 +1,6 @@
-# 🔔 Pulsando - Buzzer de Clase en Tiempo Real
+# 🔔 Pulsando v1.0 - Buzzer de Clase en Tiempo Real
 
-**Pulsando** es una aplicación web moderna diseñada para dinamizar clases y eventos, permitiendo a los profesores realizar rondas de preguntas con un sistema de pulsadores sincronizado en tiempo real.
+**Pulsando** es una aplicación web moderna diseñada para dinamizar clases y eventos. Permite a los profesores realizar rondas de preguntas con un sistema de pulsadores sincronizado en tiempo real, garantizando justicia y diversión.
 
 ---
 
@@ -8,70 +8,62 @@
 
 - **Doble Interfaz**: Vistas optimizadas para Alumno (`index.html`) y Profesor (`teacher.html`).
 - **Tiempo Real**: Sincronización instantánea mediante Firebase Firestore.
-- **Sistema Anti-Cheat**: 
-  - Penalización aleatoria (1-5s) por pulsaciones prematuras.
-  - Bloqueo visual con animación de vibración.
-- **Control Total del Profesor**:
-  - Crear sesiones con PIN de 4 dígitos.
-  - Abrir/Cerrar clase para nuevos alumnos.
-  - Expulsar alumnos de la lista en tiempo real.
-  - Visualización del ganador con marca de tiempo atómica.
-- **Diseño Premium**: Estética *Glassmorphism* responsiva, ideal para dispositivos móviles.
+- **Justicia de Juego (Anti-Cheat)**: 
+  - **Penalización por Ansia**: Bloqueo automático (2-5s) si se pulsa antes de tiempo.
+  - **Penalización por Error (⚡)**: El profesor puede retrasar 1s el botón de un alumno si contestó mal.
+- **Control Total del Docente**:
+  - Gestión de sesiones mediante PIN de 4 dígitos.
+  - Control de acceso (Cerrar/Abrir clase).
+  - Gestión de lista (Expulsar individualmente o vaciar clase).
+- **Manual Integrado**: Botón de ayuda (?) con guía rápida en el panel del profesor.
+- **Diseño de Vanguardia**: Estética *Glassmorphism* totalmente responsiva.
+
+---
+
+## 📖 Guía de Uso Rápido
+
+### Para el Profesor:
+1. Crea una clase con un nombre y un PIN de 4 dígitos.
+2. Comparte el PIN con tus alumnos.
+3. Haz clic en **ACTIVAR** para habilitar los pulsadores.
+4. El primer alumno en pulsar aparecerá en tu pantalla.
+5. Usa **REINICIAR** para limpiar el ganador y empezar la siguiente pregunta.
+
+### Para el Alumno:
+1. Introduce el nombre de la clase, tu nombre y el PIN.
+2. Espera a que el profesor active el pulsador (el botón se pondrá rojo).
+3. ¡Sé el más rápido en pulsar! 
 
 ---
 
 ## 🛠️ Tecnologías
 
-- **Frontend**: HTML5, CSS3 (Modern CSS), JavaScript (ES6+).
-- **Backend**: Firebase Firestore (NoSQL).
-- **Herramientas**: Vite.js (Empaquetado), Vercel (Despliegue).
+- **Frontend**: HTML5, CSS3, JavaScript (ES6+).
+- **Backend**: Firebase Firestore.
+- **Build Tool**: Vite.js.
+- **Deployment**: Vercel.
 
 ---
 
 ## 💻 Configuración Local
 
-1. **Clonar el repositorio**:
-   ```bash
-   git clone <url-del-repo>
-   cd pulsando
-   ```
-
-2. **Instalar dependencias**:
-   ```bash
-   npm install
-   ```
-
-3. **Configurar variables de entorno**:
-   Crea un archivo `.env` en la raíz con tus credenciales de Firebase:
-   ```env
-   VITE_FIREBASE_API_KEY=XXXXXXXXXX
-   VITE_FIREBASE_AUTH_DOMAIN=XXXXXXXXXX
-   VITE_FIREBASE_PROJECT_ID=XXXXXXXXXX
-   VITE_FIREBASE_STORAGE_BUCKET=XXXXXXXXXX
-   VITE_FIREBASE_MESSAGING_SENDER_ID=XXXXXXXXXX
-   VITE_FIREBASE_APP_ID=XXXXXXXXXX
-   ```
-
-4. **Ejecutar en desarrollo**:
-   ```bash
-   npm run dev
-   ```
+1. **Instalar dependencias**: `npm install`
+2. **Configurar .env**: Crea un archivo `.env` con tus claves de Firebase.
+3. **Ejecutar**: `npm run dev`
 
 ---
 
-## 🌐 Despliegue en Vercel
+## 🌐 Despliegue (Vercel)
 
-Este proyecto está configurado para desplegarse fácilmente en Vercel:
-
-1. Conecta tu repositorio de GitHub a Vercel.
-2. En los ajustes del proyecto, añade las **Environment Variables** con los mismos nombres que en el archivo `.env`.
-3. Vercel detectará automáticamente la configuración de **Vite** y realizará el despliegue.
+1. Sube el código a GitHub (el `.env` será ignorado por seguridad).
+2. En Vercel, añade las variables de entorno necesarias (`VITE_FIREBASE_API_KEY`, etc.).
+3. Vercel desplegará automáticamente la aplicación.
 
 ---
 
-## 🔒 Seguridad (Reglas de Firestore)
+## 🔒 Reglas de Seguridad de Firestore
 
-Asegúrate de configurar las reglas de tu base de datos para permitir el acceso mediante PIN:
+Copia estas reglas en tu consola de Firebase para asegurar el funcionamiento:
 
 ```javascript
 rules_version = '2';
