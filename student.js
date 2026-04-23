@@ -30,6 +30,14 @@ function showScreen(screenId) {
     screens[screenId].classList.remove('hidden');
 }
 
+// Función para calcular el próximo domingo a las 00:00
+function getNextSunday() {
+    const d = new Date();
+    d.setDate(d.getDate() + (7 - d.getDay()) % 7 || 7);
+    d.setHours(0, 0, 0, 0);
+    return d;
+}
+
 // Unirse a Clase
 document.getElementById('btn-join-session').onclick = async () => {
     const className = document.getElementById('input-join-class').value;
@@ -65,7 +73,8 @@ document.getElementById('btn-join-session').onclick = async () => {
             transaction.set(studentRef, {
                 name: name,
                 joinedAt: serverTimestamp(),
-                penalty: false // Por defecto sin penalización
+                penalty: false,
+                expireAt: getNextSunday() // <--- PARA BORRADO AUTOMÁTICO DEL ALUMNO
             });
 
             document.getElementById('student-display-class').innerText = data.className;
@@ -97,7 +106,6 @@ function startKickListener(sessionId, studentName) {
             alert("Has sido expulsado.");
             window.location.reload(); 
         } else if (docSnap.exists()) {
-            // Actualizamos si tenemos penalización por respuesta incorrecta
             hasUserPenalty = docSnap.data().penalty || false;
         }
     });
@@ -107,7 +115,6 @@ function startKickListener(sessionId, studentName) {
 document.getElementById('buzzer-button').onclick = async () => {
     if (!currentSessionId || penaltyActive) return;
 
-    // Si el botón está en "modo retraso" (penalizado), no hace nada hasta que pase el tiempo
     const btn = document.getElementById('buzzer-button');
     if (hasUserPenalty && !btn.classList.contains('active')) return;
 
@@ -132,7 +139,6 @@ document.getElementById('buzzer-button').onclick = async () => {
                     active: false
                 });
                 
-                // Limpiamos nuestra penalización al pulsar (ya la hemos "cumplido")
                 const studentRef = doc(db, "sessions", currentSessionId, "students", currentStudentName);
                 transaction.update(studentRef, { penalty: false });
             }
@@ -177,7 +183,6 @@ function updateUI(data) {
 
     if (data.active) {
         if (hasUserPenalty) {
-            // RETRASO DE 1 SEGUNDO POR PENALIZACIÓN PREVIA
             statusBadge.innerText = "ESPERA... (PENALIZADO ⚡)";
             statusBadge.className = "status-badge status-waiting";
             buzzerBtn.classList.remove('active');

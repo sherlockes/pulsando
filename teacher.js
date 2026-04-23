@@ -30,6 +30,15 @@ function showScreen(screenId) {
     screens[screenId].classList.remove('hidden');
 }
 
+// Función para calcular el próximo domingo a las 00:00
+function getNextSunday() {
+    const d = new Date();
+    // Encuentra el próximo domingo (0)
+    d.setDate(d.getDate() + (7 - d.getDay()) % 7 || 7);
+    d.setHours(0, 0, 0, 0);
+    return d;
+}
+
 // Crear Sesión
 document.getElementById('btn-create-session').onclick = async () => {
     const className = document.getElementById('input-class-name').value;
@@ -53,7 +62,8 @@ document.getElementById('btn-create-session').onclick = async () => {
             active: false,
             locked: false,
             winner: null,
-            createdAt: serverTimestamp()
+            createdAt: serverTimestamp(),
+            expireAt: getNextSunday() // <--- CAMPO CLAVE PARA EL BORRADO AUTOMÁTICO
         });
 
         currentSessionId = sessionId;
@@ -196,6 +206,7 @@ function updateUI(data) {
     } else {
         btnLock.innerText = "CERRAR";
         btnLock.style.background = "transparent";
+        btnLock.style.color = "var(--text-light)";
     }
 
     if (data.active) {
