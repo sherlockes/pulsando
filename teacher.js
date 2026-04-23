@@ -1,15 +1,15 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { 
-    getFirestore, 
-    doc, 
-    setDoc, 
-    updateDoc, 
+import {
+    getFirestore,
+    doc,
+    setDoc,
+    updateDoc,
     deleteDoc,
     getDocs,
-    onSnapshot, 
+    onSnapshot,
     collection,
     writeBatch,
-    serverTimestamp 
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 
@@ -30,15 +30,6 @@ function showScreen(screenId) {
     screens[screenId].classList.remove('hidden');
 }
 
-// Función para calcular el próximo domingo a las 00:00
-function getNextSunday() {
-    const d = new Date();
-    // Encuentra el próximo domingo (0)
-    d.setDate(d.getDate() + (7 - d.getDay()) % 7 || 7);
-    d.setHours(0, 0, 0, 0);
-    return d;
-}
-
 // Crear Sesión
 document.getElementById('btn-create-session').onclick = async () => {
     const className = document.getElementById('input-class-name').value;
@@ -51,7 +42,7 @@ document.getElementById('btn-create-session').onclick = async () => {
     }
 
     try {
-        const sessionId = code; 
+        const sessionId = code;
         const sessionRef = doc(db, "sessions", sessionId);
 
         await setDoc(sessionRef, {
@@ -62,14 +53,13 @@ document.getElementById('btn-create-session').onclick = async () => {
             active: false,
             locked: false,
             winner: null,
-            createdAt: serverTimestamp(),
-            expireAt: getNextSunday() // <--- CAMPO CLAVE PARA EL BORRADO AUTOMÁTICO
+            createdAt: serverTimestamp()
         });
 
         currentSessionId = sessionId;
         document.getElementById('display-class-name').innerText = className;
         document.getElementById('display-class-code').innerText = code;
-        
+
         startRealtimeListener(sessionId);
         startStudentsListener(sessionId);
         showScreen('panel');
@@ -108,15 +98,15 @@ document.getElementById('btn-lock-session').onclick = async () => {
 // Vaciar Clase
 document.getElementById('btn-clear-session').onclick = async () => {
     if (!currentSessionId || !confirm("¿Seguro que quieres expulsar a TODOS los alumnos?")) return;
-    
+
     const studentsRef = collection(db, "sessions", currentSessionId, "students");
     const snapshot = await getDocs(studentsRef);
-    
+
     const batch = writeBatch(db);
     snapshot.forEach((doc) => {
         batch.delete(doc.ref);
     });
-    
+
     await batch.commit();
     await updateDoc(doc(db, "sessions", currentSessionId), { studentCount: 0 });
 };
@@ -124,7 +114,7 @@ document.getElementById('btn-clear-session').onclick = async () => {
 // Penalizar Ganador
 document.getElementById('btn-penalize-winner').onclick = async () => {
     if (!currentSessionId || !lastWinnerName) return;
-    
+
     const studentRef = doc(db, "sessions", currentSessionId, "students", lastWinnerName);
     await updateDoc(studentRef, { penalty: true });
     alert(`Alumno ${lastWinnerName} penalizado para la siguiente ronda ⚡`);
@@ -154,7 +144,7 @@ function startStudentsListener(sessionId) {
     onSnapshot(studentsRef, (querySnapshot) => {
         const studentList = document.getElementById('student-list');
         const studentCount = document.getElementById('student-count');
-        
+
         studentList.innerHTML = "";
         studentCount.innerText = querySnapshot.size;
 
@@ -176,7 +166,7 @@ function startStudentsListener(sessionId) {
                 padding-right: 0.5rem;
                 ${student.penalty ? 'border: 1px solid #f59e0b;' : ''}
             `;
-            
+
             badge.innerHTML = `
                 <span>${student.penalty ? '<span class="penalty-tag">⚡</span>' : ''}${student.name}</span>
                 <div class="kick-btn" title="Expulsar">×</div>
@@ -206,7 +196,6 @@ function updateUI(data) {
     } else {
         btnLock.innerText = "CERRAR";
         btnLock.style.background = "transparent";
-        btnLock.style.color = "var(--text-light)";
     }
 
     if (data.active) {

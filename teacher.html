@@ -40,6 +40,19 @@
             font-weight: 900;
             margin-right: 4px;
         }
+        /* Ajustes específicos para el modal de ayuda */
+        .help-section {
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .help-section:last-child { border: none; }
+        .help-section h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -47,19 +60,37 @@
         <!-- Botón de Ayuda -->
         <div id="btn-help" class="help-btn" title="Ayuda">?</div>
 
-        <!-- Modal de Ayuda -->
+        <!-- Modal de Ayuda Mejorado -->
         <div id="modal-help" class="modal-overlay hidden">
-            <div class="modal-content">
-                <h2>Guía del Profesor</h2>
-                <ul>
-                    <li>✅ <b>ACTIVAR</b>: Habilita el botón a los alumnos.</li>
-                    <li>🔄 <b>REINICIAR</b>: Limpia el ganador y desactiva el botón.</li>
-                    <li>🔒 <b>CERRAR</b>: Nadie más podrá unirse a la clase.</li>
-                    <li>🧹 <b>VACIAR</b>: Expulsa a todos los alumnos a la vez.</li>
-                    <li>⚡ <b>PENALIZAR</b>: Retrasa 1s el botón del ganador si falló.</li>
-                    <li>× <b>EXPULSAR</b>: Saca a un alumno específico de la lista.</li>
-                </ul>
-                <button id="btn-close-help" class="btn btn-primary mt-4">Entendido</button>
+            <div class="modal-content" style="max-width: 500px;">
+                <h2 style="text-align: center; margin-bottom: 1.5rem;">Manual del Profesor 🔔</h2>
+                
+                <div class="help-section">
+                    <h3>🎮 Dinámica de Juego</h3>
+                    <ul>
+                        <li><b>ACTIVAR</b>: Pone los botones de los alumnos en ROJO. El primero que pulse gana.</li>
+                        <li><b>REINICIAR</b>: Apaga los botones y limpia el ganador para una nueva pregunta.</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>⚖️ Sistema de Justicia</h3>
+                    <ul>
+                        <li><b>ANSIA (Auto)</b>: Si un alumno pulsa antes de que tú actives, se bloquea 2-5 segundos.</li>
+                        <li><b>PENALIZAR (⚡)</b>: Si el ganador falla, pulsa este botón. En la siguiente ronda, su botón tardará 1 segundo extra en encenderse.</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>👥 Gestión de Alumnos</h3>
+                    <ul>
+                        <li><b>CERRAR</b>: Nadie más podrá unirse (útil si ya están todos).</li>
+                        <li><b>VACIAR</b>: Expulsa a todos para empezar con un grupo nuevo.</li>
+                        <li><b>EXPULSAR (×)</b>: Saca a un alumno individualmente si se porta mal.</li>
+                    </ul>
+                </div>
+
+                <button id="btn-close-help" class="btn btn-primary" style="width: 100%;">¡Entendido, a jugar!</button>
             </div>
         </div>
 
