@@ -5,8 +5,10 @@ import {
     setDoc, 
     updateDoc, 
     deleteDoc,
+    getDocs,
     onSnapshot, 
     collection,
+    writeBatch,
     serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
@@ -16,6 +18,7 @@ const db = getFirestore(app);
 
 let currentSessionId = null;
 let isLocked = false;
+let lastWinnerName = null;
 
 const screens = {
     create: document.getElementById('screen-create-session'),
@@ -83,7 +86,7 @@ document.getElementById('btn-reset-buzzer').onclick = async () => {
     });
 };
 
-// Control de Bloqueo de Clase
+// Control de Bloqueo
 document.getElementById('btn-lock-session').onclick = async () => {
     if (!currentSessionId) return;
     isLocked = !isLocked;
@@ -92,11 +95,46 @@ document.getElementById('btn-lock-session').onclick = async () => {
     });
 };
 
+// Vaciar Clase
+document.getElementById('btn-clear-session').onclick = async () => {
+    if (!currentSessionId || !confirm("¿Seguro que quieres expulsar a TODOS los alumnos?")) return;
+    
+    const studentsRef = collection(db, "sessions", currentSessionId, "students");
+    const snapshot = await getDocs(studentsRef);
+    
+    const batch = writeBatch(db);
+    snapshot.forEach((doc) => {
+        batch.delete(doc.ref);
+    });
+    
+    await batch.commit();
+    await updateDoc(doc(db, "sessions", currentSessionId), { studentCount: 0 });
+};
+
+// Penalizar Ganador
+document.getElementById('btn-penalize-winner').onclick = async () => {
+    if (!currentSessionId || !lastWinnerName) return;
+    
+    const studentRef = doc(db, "sessions", currentSessionId, "students", lastWinnerName);
+    await updateDoc(studentRef, { penalty: true });
+    alert(`Alumno ${lastWinnerName} penalizado para la siguiente ronda ⚡`);
+};
+
+// Control de Ayuda
+document.getElementById('btn-help').onclick = () => {
+    document.getElementById('modal-help').classList.remove('hidden');
+};
+
+document.getElementById('btn-close-help').onclick = () => {
+    document.getElementById('modal-help').classList.add('hidden');
+};
+
 function startRealtimeListener(sessionId) {
     onSnapshot(doc(db, "sessions", sessionId), (docSnap) => {
         if (!docSnap.exists()) return;
         const data = docSnap.data();
         isLocked = data.locked;
+        lastWinnerName = data.winner ? data.winner.name : null;
         updateUI(data);
     });
 }
@@ -126,23 +164,18 @@ function startStudentsListener(sessionId) {
                 align-items: center; 
                 gap: 0.5rem;
                 padding-right: 0.5rem;
+                ${student.penalty ? 'border: 1px solid #f59e0b;' : ''}
             `;
             
             badge.innerHTML = `
-                <span>${student.name}</span>
+                <span>${student.penalty ? '<span class="penalty-tag">⚡</span>' : ''}${student.name}</span>
                 <div class="kick-btn" title="Expulsar">×</div>
             `;
 
-            // Lógica para expulsar alumno mejorada
             badge.querySelector('.kick-btn').onclick = async (e) => {
-                e.stopPropagation(); // Evitar comportamientos extraños
+                e.stopPropagation();
                 if (confirm(`¿Expulsar a ${student.name}?`)) {
-                    try {
-                        const studentDocRef = doc(db, "sessions", sessionId, "students", student.name);
-                        await deleteDoc(studentDocRef);
-                    } catch (err) {
-                        console.error("Error al expulsar:", err);
-                    }
+                    await deleteDoc(doc(db, "sessions", sessionId, "students", student.name));
                 }
             };
 
@@ -158,13 +191,11 @@ function updateUI(data) {
     const btnLock = document.getElementById('btn-lock-session');
 
     if (data.locked) {
-        btnLock.innerText = "ABRIR CLASE";
+        btnLock.innerText = "ABRIR";
         btnLock.style.background = "var(--danger)";
-        btnLock.style.color = "white";
     } else {
-        btnLock.innerText = "CERRAR CLASE";
+        btnLock.innerText = "CERRAR";
         btnLock.style.background = "transparent";
-        btnLock.style.color = "var(--text-light)";
     }
 
     if (data.active) {

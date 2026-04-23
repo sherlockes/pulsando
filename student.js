@@ -3,6 +3,7 @@ import {
     getFirestore, 
     doc, 
     getDoc,
+    updateDoc,
     onSnapshot, 
     runTransaction,
     collection,
@@ -15,7 +16,8 @@ const db = getFirestore(app);
 
 let currentSessionId = null;
 let currentStudentName = "";
-let penaltyActive = false;
+let penaltyActive = false; // Bloqueo por pulsar antes de tiempo
+let hasUserPenalty = false; // Penalización por respuesta anterior incorrecta
 let studentDocListener = null;
 
 const screens = {
@@ -47,7 +49,6 @@ document.getElementById('btn-join-session').onclick = async () => {
         if (sessionSnap.data().locked) throw "SESSION_LOCKED";
         if (sessionSnap.data().className.toLowerCase() !== className.toLowerCase()) throw "CLASS_NAME_MISMATCH";
 
-        // Iniciamos la escucha de expulsión ANTES de entrar formalmente
         startKickListener(code, name);
 
         await runTransaction(db, async (transaction) => {
@@ -63,7 +64,8 @@ document.getElementById('btn-join-session').onclick = async () => {
             const studentRef = doc(db, "sessions", code, "students", name);
             transaction.set(studentRef, {
                 name: name,
-                joinedAt: serverTimestamp()
+                joinedAt: serverTimestamp(),
+                penalty: false // Por defecto sin penalización
             });
 
             document.getElementById('student-display-class').innerText = data.className;
@@ -76,36 +78,38 @@ document.getElementById('btn-join-session').onclick = async () => {
         startRealtimeListener(code);
         showScreen('buzzer');
     } catch (e) {
-        // Limpiar listener si falló el ingreso
         if (studentDocListener) studentDocListener();
-        
-        if (e === "SESSION_NOT_FOUND") alert("PIN incorrecto. La clase no existe.");
-        else if (e === "SESSION_LOCKED") alert("La clase está cerrada. No puedes unirte ahora.");
-        else if (e === "CLASS_NAME_MISMATCH") alert("El nombre de la clase no coincide con el PIN.");
-        else if (e === "SESSION_FULL") alert("La clase está llena.");
+        if (e === "SESSION_NOT_FOUND") alert("PIN incorrecto.");
+        else if (e === "SESSION_LOCKED") alert("Clase cerrada.");
+        else if (e === "CLASS_NAME_MISMATCH") alert("Nombre de clase incorrecto.");
+        else if (e === "SESSION_FULL") alert("Clase llena.");
         else console.error(e);
     }
 };
 
 function startKickListener(sessionId, studentName) {
     if (studentDocListener) studentDocListener(); 
-    
     const studentRef = doc(db, "sessions", sessionId, "students", studentName);
     
-    // Escuchamos cambios en el documento del alumno
     studentDocListener = onSnapshot(studentRef, (docSnap) => {
-        // Si el documento deja de existir, el alumno ha sido expulsado
         if (!docSnap.exists() && currentSessionId) {
-            currentSessionId = null; // Evitar bucles
-            alert("Has sido expulsado de la clase.");
+            currentSessionId = null;
+            alert("Has sido expulsado.");
             window.location.reload(); 
+        } else if (docSnap.exists()) {
+            // Actualizamos si tenemos penalización por respuesta incorrecta
+            hasUserPenalty = docSnap.data().penalty || false;
         }
     });
 }
 
-// Acción de Pulsar con Anti-Cheat (Penalización)
+// Acción de Pulsar
 document.getElementById('buzzer-button').onclick = async () => {
     if (!currentSessionId || penaltyActive) return;
+
+    // Si el botón está en "modo retraso" (penalizado), no hace nada hasta que pase el tiempo
+    const btn = document.getElementById('buzzer-button');
+    if (hasUserPenalty && !btn.classList.contains('active')) return;
 
     const sessionRef = doc(db, "sessions", currentSessionId);
     
@@ -124,12 +128,13 @@ document.getElementById('buzzer-button').onclick = async () => {
             
             if (tData.active && !tData.winner) {
                 transaction.update(sessionRef, {
-                    winner: {
-                        name: currentStudentName,
-                        timestamp: serverTimestamp()
-                    },
+                    winner: { name: currentStudentName, timestamp: serverTimestamp() },
                     active: false
                 });
+                
+                // Limpiamos nuestra penalización al pulsar (ya la hemos "cumplido")
+                const studentRef = doc(db, "sessions", currentSessionId, "students", currentStudentName);
+                transaction.update(studentRef, { penalty: false });
             }
         });
     } catch (e) {
@@ -138,8 +143,6 @@ document.getElementById('buzzer-button').onclick = async () => {
 };
 
 async function applyPenalty() {
-    if (!currentSessionId) return;
-    
     penaltyActive = true;
     const btn = document.getElementById('buzzer-button');
     const badge = document.getElementById('student-status-badge');
@@ -147,19 +150,13 @@ async function applyPenalty() {
     
     btn.classList.add('penalty');
     badge.innerText = "¡BLOQUEADO POR ANSIA!";
-    badge.style.color = "#ef4444";
-
+    
     setTimeout(async () => {
         penaltyActive = false;
         btn.classList.remove('penalty');
-        badge.style.color = "";
-        
         if (currentSessionId) {
-            const sessionRef = doc(db, "sessions", currentSessionId);
-            const docSnap = await getDoc(sessionRef);
-            if (docSnap.exists()) {
-                updateUI(docSnap.data());
-            }
+            const docSnap = await getDoc(doc(db, "sessions", currentSessionId));
+            if (docSnap.exists()) updateUI(docSnap.data());
         }
     }, penaltyTime);
 }
@@ -167,8 +164,7 @@ async function applyPenalty() {
 function startRealtimeListener(sessionId) {
     onSnapshot(doc(db, "sessions", sessionId), (docSnap) => {
         if (!docSnap.exists()) return;
-        const data = docSnap.data();
-        updateUI(data);
+        updateUI(docSnap.data());
     });
 }
 
@@ -180,9 +176,24 @@ function updateUI(data) {
     if (penaltyActive) return;
 
     if (data.active) {
-        statusBadge.innerText = "¡DALE YA!";
-        statusBadge.className = "status-badge status-active";
-        buzzerBtn.classList.add('active');
+        if (hasUserPenalty) {
+            // RETRASO DE 1 SEGUNDO POR PENALIZACIÓN PREVIA
+            statusBadge.innerText = "ESPERA... (PENALIZADO ⚡)";
+            statusBadge.className = "status-badge status-waiting";
+            buzzerBtn.classList.remove('active');
+            
+            setTimeout(() => {
+                if (data.active && !penaltyActive && hasUserPenalty) {
+                    statusBadge.innerText = "¡DALE YA!";
+                    statusBadge.className = "status-badge status-active";
+                    buzzerBtn.classList.add('active');
+                }
+            }, 1000);
+        } else {
+            statusBadge.innerText = "¡DALE YA!";
+            statusBadge.className = "status-badge status-active";
+            buzzerBtn.classList.add('active');
+        }
     } else {
         statusBadge.innerText = "Esperando al profesor...";
         statusBadge.className = "status-badge status-waiting";

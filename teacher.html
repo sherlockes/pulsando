@@ -35,10 +35,34 @@
             background: #ef4444;
             color: white;
         }
+        .penalty-tag {
+            color: #f59e0b;
+            font-weight: 900;
+            margin-right: 4px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Botón de Ayuda -->
+        <div id="btn-help" class="help-btn" title="Ayuda">?</div>
+
+        <!-- Modal de Ayuda -->
+        <div id="modal-help" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h2>Guía del Profesor</h2>
+                <ul>
+                    <li>✅ <b>ACTIVAR</b>: Habilita el botón a los alumnos.</li>
+                    <li>🔄 <b>REINICIAR</b>: Limpia el ganador y desactiva el botón.</li>
+                    <li>🔒 <b>CERRAR</b>: Nadie más podrá unirse a la clase.</li>
+                    <li>🧹 <b>VACIAR</b>: Expulsa a todos los alumnos a la vez.</li>
+                    <li>⚡ <b>PENALIZAR</b>: Retrasa 1s el botón del ganador si falló.</li>
+                    <li>× <b>EXPULSAR</b>: Saca a un alumno específico de la lista.</li>
+                </ul>
+                <button id="btn-close-help" class="btn btn-primary mt-4">Entendido</button>
+            </div>
+        </div>
+
         <!-- Pantalla Crear Sesión -->
         <div id="screen-create-session" class="card">
             <span class="profesor-label">Modo Profesor</span>
@@ -72,7 +96,10 @@
             <div class="mt-4" style="background: rgba(0,0,0,0.2); border-radius: 1rem; padding: 1rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <p style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin: 0;">ALUMNOS (<span id="student-count">0</span>)</p>
-                    <button id="btn-lock-session" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.7rem; margin: 0; width: auto;">CERRAR CLASE</button>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button id="btn-lock-session" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.7rem; margin: 0; width: auto;">CERRAR</button>
+                        <button id="btn-clear-session" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.7rem; margin: 0; width: auto; border-color: var(--danger); color: var(--danger);">VACIAR</button>
+                    </div>
                 </div>
                 <div id="student-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
                     <span style="color: var(--text-muted); font-size: 0.8rem;">Esperando alumnos...</span>
@@ -87,6 +114,7 @@
                 <div id="winner-display" class="winner-card hidden">
                     <p>¡TENEMOS UN GANADOR!</p>
                     <span id="winner-name" class="winner-name">---</span>
+                    <button id="btn-penalize-winner" class="btn btn-outline" style="margin-top: 1rem; font-size: 0.7rem; border-color: #f59e0b; color: #f59e0b;">¿FALLÓ? (PENALIZAR ⚡)</button>
                 </div>
 
                 <div class="mt-4">
