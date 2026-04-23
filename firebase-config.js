@@ -1,21 +1,15 @@
 /**
  * Configuración de Firebase para la aplicación Pulsando.
- * Reemplaza los valores de abajo con las credenciales de tu proyecto en Firebase Console.
- * 
- * Instrucciones:
- * 1. Ve a https://console.firebase.google.com/
- * 2. Crea un nuevo proyecto.
- * 3. Añade una aplicación web.
- * 4. Copia el objeto firebaseConfig y pégalo aquí.
- * 5. Asegúrate de habilitar 'Firestore Database' en el panel de Firebase.
+ * Esta configuración utiliza variables de entorno de Vite para mayor seguridad.
+ * En producción (Vercel), asegúrate de configurar estas variables en el panel de control.
  */
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyBqf9r9y6zTv29mbsdlCZ3L-2wSGpL1FK0",
-  authDomain: "pulsando-a7dbd.firebaseapp.com",
-  projectId: "pulsando-a7dbd",
-  storageBucket: "pulsando-a7dbd.firebasestorage.app",
-  messagingSenderId: "622518795926",
-  appId: "1:622518795926:web:ffa46cab4c0738e2f00cb7",
-  measurementId: "G-S1LP9B24T6"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };

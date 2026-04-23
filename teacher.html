@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulsando | Panel del Profesor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .profesor-label {
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+        .kick-btn {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .kick-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Pantalla Crear Sesión -->
+        <div id="screen-create-session" class="card">
+            <span class="profesor-label">Modo Profesor</span>
+            <h1>Nueva Clase</h1>
+            <p class="subtitle">Configura tu clase en tiempo real</p>
+            <div class="form-group">
+                <label for="input-class-name">Nombre de la Clase</label>
+                <input type="text" id="input-class-name" placeholder="Ej: Matemáticas 4ºA">
+            </div>
+            <div class="form-group">
+                <label for="input-class-code">PIN de Acceso (4 dígitos)</label>
+                <input type="text" id="input-class-code" maxlength="4" placeholder="Ej: 1234">
+            </div>
+            <div class="form-group">
+                <label for="input-max-students">Máximo de Alumnos</label>
+                <input type="number" id="input-max-students" value="30">
+            </div>
+            <button id="btn-create-session" class="btn btn-primary">Empezar Sesión</button>
+            <a href="index.html" class="btn btn-outline">Ir a vista Alumno</a>
+        </div>
+
+        <!-- Panel de Control (Profesor) -->
+        <div id="screen-teacher-panel" class="card hidden">
+            <div id="teacher-info">
+                <span class="profesor-label">Modo Profesor</span>
+                <h1 id="display-class-name">Clase</h1>
+                <p class="text-center">PIN: <strong id="display-class-code" style="color: var(--primary)">----</strong></p>
+            </div>
+
+            <!-- Lista de Alumnos -->
+            <div class="mt-4" style="background: rgba(0,0,0,0.2); border-radius: 1rem; padding: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <p style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin: 0;">ALUMNOS (<span id="student-count">0</span>)</p>
+                    <button id="btn-lock-session" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.7rem; margin: 0; width: auto;">CERRAR CLASE</button>
+                </div>
+                <div id="student-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                    <span style="color: var(--text-muted); font-size: 0.8rem;">Esperando alumnos...</span>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <div class="text-center">
+                    <span id="teacher-status-badge" class="status-badge status-waiting">Esperando...</span>
+                </div>
+                
+                <div id="winner-display" class="winner-card hidden">
+                    <p>¡TENEMOS UN GANADOR!</p>
+                    <span id="winner-name" class="winner-name">---</span>
+                </div>
+
+                <div class="mt-4">
+                    <button id="btn-activate-buzzer" class="btn btn-secondary">ACTIVAR PULSADOR</button>
+                    <button id="btn-reset-buzzer" class="btn btn-danger">REINICIAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK & Teacher Logic -->
+    <script type="module" src="teacher.js"></script>
+</body>
+</html>

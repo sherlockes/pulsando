@@ -163,9 +163,9 @@ input:focus {
     width: 180px;
     height: 180px;
     border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, #f87171, #ef4444);
-    border: 10px solid #991b1b;
-    box-shadow: 0 10px 0 #7f1d1d, 0 20px 40px rgba(0,0,0,0.4);
+    background: radial-gradient(circle at 30% 30%, #475569, #334155);
+    border: 10px solid #1e293b;
+    box-shadow: 0 10px 0 #0f172a, 0 20px 40px rgba(0,0,0,0.4);
     cursor: pointer;
     transition: all 0.1s;
     display: flex;
@@ -177,16 +177,15 @@ input:focus {
     text-transform: uppercase;
 }
 
-.buzzer:active:not(:disabled) {
-    transform: translateY(10px);
-    box-shadow: 0 0 0 #7f1d1d, 0 10px 20px rgba(0,0,0,0.4);
+.buzzer.active {
+    background: radial-gradient(circle at 30% 30%, #f87171, #ef4444);
+    border-color: #991b1b;
+    box-shadow: 0 10px 0 #7f1d1d, 0 20px 40px rgba(0,0,0,0.4);
 }
 
-.buzzer:disabled {
-    background: radial-gradient(circle at 30% 30%, #475569, #334155);
-    border-color: #1e293b;
-    box-shadow: 0 5px 0 #0f172a;
-    cursor: not-allowed;
+.buzzer:active:not(.penalty):not(:disabled) {
+    transform: translateY(10px);
+    box-shadow: 0 0 0 #7f1d1d, 0 10px 20px rgba(0,0,0,0.4);
 }
 
 /* Winner Display */
@@ -219,6 +218,22 @@ input:focus {
 
 .status-active { background: rgba(16, 185, 129, 0.2); color: #10b981; }
 .status-waiting { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+
+/* Penalty Styles */
+.buzzer.penalty {
+    background: radial-gradient(circle at 30% 30%, #4b5563, #1f2937) !important;
+    border-color: #111827 !important;
+    box-shadow: 0 5px 0 #0f172a !important;
+    animation: shake 0.2s ease-in-out 0s 2;
+    cursor: not-allowed;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+    100% { transform: translateX(0); }
+}
 
 /* Utilities */
 .hidden { display: none; }

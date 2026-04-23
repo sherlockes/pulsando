@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pulsando | Buzzer de Clase</title>
+    <title>Pulsando | Unirse a Clase</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,72 +11,26 @@
 </head>
 <body>
     <div class="container">
-        <!-- Pantalla de Inicio -->
-        <div id="screen-home" class="card">
-            <h1>Pulsando</h1>
-            <p class="subtitle">¿Quién será el más rápido hoy?</p>
-            <button id="btn-goto-teacher" class="btn btn-primary">Soy el Profesor</button>
-            <button id="btn-goto-student" class="btn btn-secondary">Soy un Alumno</button>
-        </div>
-
-        <!-- Pantalla Crear Sesión (Profesor) -->
-        <div id="screen-create-session" class="card hidden">
-            <h1>Crear Sesión</h1>
-            <p class="subtitle">Configura tu clase</p>
-            <div class="form-group">
-                <label for="input-class-name">Nombre de la Clase</label>
-                <input type="text" id="input-class-name" placeholder="Ej: Matemáticas 4ºA">
-            </div>
-            <div class="form-group">
-                <label for="input-class-code">Código de Acceso (4 dígitos)</label>
-                <input type="text" id="input-class-code" maxlength="4" placeholder="Ej: 1234">
-            </div>
-            <div class="form-group">
-                <label for="input-max-students">Máximo de Alumnos</label>
-                <input type="number" id="input-max-students" value="30">
-            </div>
-            <button id="btn-create-session" class="btn btn-primary">Empezar Sesión</button>
-            <button class="btn btn-outline btn-back">Volver</button>
-        </div>
-
-        <!-- Panel de Control (Profesor) -->
-        <div id="screen-teacher-panel" class="card hidden">
-            <div id="teacher-info">
-                <h1 id="display-class-name">Clase</h1>
-                <p class="text-center">Código: <strong id="display-class-code" style="color: var(--primary)">----</strong></p>
-            </div>
-
-            <div class="mt-4">
-                <div class="text-center">
-                    <span id="teacher-status-badge" class="status-badge status-waiting">Esperando...</span>
-                </div>
-                
-                <div id="winner-display" class="winner-card hidden">
-                    <p>¡TENEMOS UN GANADOR!</p>
-                    <span id="winner-name" class="winner-name">---</span>
-                </div>
-
-                <div class="mt-4">
-                    <button id="btn-activate-buzzer" class="btn btn-secondary">ACTIVAR PULSADOR</button>
-                    <button id="btn-reset-buzzer" class="btn btn-danger">REINICIAR</button>
-                </div>
-            </div>
-        </div>
-
         <!-- Pantalla Unirse (Alumno) -->
-        <div id="screen-join-session" class="card hidden">
-            <h1>Unirse a Clase</h1>
-            <p class="subtitle">Introduce el código del profesor</p>
+        <div id="screen-join-session" class="card">
+            <h1>Pulsando</h1>
+            <p class="subtitle">Introduce los datos de tu clase</p>
+            <div class="form-group">
+                <label for="input-join-class">Nombre de la Clase</label>
+                <input type="text" id="input-join-class" placeholder="Ej: Matemáticas">
+            </div>
             <div class="form-group">
                 <label for="input-student-name">Tu Nombre</label>
                 <input type="text" id="input-student-name" placeholder="Tu nombre">
             </div>
             <div class="form-group">
-                <label for="input-join-code">Código de Acceso</label>
+                <label for="input-join-code">PIN de la Clase</label>
                 <input type="text" id="input-join-code" maxlength="4" placeholder="4 dígitos">
             </div>
-            <button id="btn-join-session" class="btn btn-secondary">Entrar</button>
-            <button class="btn btn-outline btn-back">Volver</button>
+            <button id="btn-join-session" class="btn btn-secondary">Entrar a Clase</button>
+            <div class="text-center mt-4">
+                <a href="teacher.html" style="color: var(--text-muted); font-size: 0.8rem; text-decoration: none;">Acceso Profesor</a>
+            </div>
         </div>
 
         <!-- Pulsador (Alumno) -->
@@ -85,7 +39,7 @@
             <p class="text-center">Hola, <span id="student-display-name">---</span></p>
             
             <div class="buzzer-container">
-                <button id="buzzer-button" class="buzzer" disabled>PULSAR</button>
+                <button id="buzzer-button" class="buzzer">PULSAR</button>
             </div>
 
             <div id="student-status" class="text-center">
@@ -99,7 +53,7 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script type="module" src="app.js"></script>
+    <!-- Firebase SDK & Student Logic -->
+    <script type="module" src="student.js"></script>
 </body>
 </html>

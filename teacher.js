@@ -1,0 +1,186 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+import { 
+    getFirestore, 
+    doc, 
+    setDoc, 
+    updateDoc, 
+    deleteDoc,
+    onSnapshot, 
+    collection,
+    serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { firebaseConfig } from "./firebase-config.js";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let currentSessionId = null;
+let isLocked = false;
+
+const screens = {
+    create: document.getElementById('screen-create-session'),
+    panel: document.getElementById('screen-teacher-panel')
+};
+
+function showScreen(screenId) {
+    Object.values(screens).forEach(s => s.classList.add('hidden'));
+    screens[screenId].classList.remove('hidden');
+}
+
+// Crear Sesión
+document.getElementById('btn-create-session').onclick = async () => {
+    const className = document.getElementById('input-class-name').value;
+    const code = document.getElementById('input-class-code').value;
+    const maxStudents = parseInt(document.getElementById('input-max-students').value);
+
+    if (!className || code.length !== 4) {
+        alert("Por favor, rellena los datos correctamente (PIN de 4 dígitos).");
+        return;
+    }
+
+    try {
+        const sessionId = code; 
+        const sessionRef = doc(db, "sessions", sessionId);
+
+        await setDoc(sessionRef, {
+            className,
+            code,
+            maxStudents,
+            studentCount: 0,
+            active: false,
+            locked: false,
+            winner: null,
+            createdAt: serverTimestamp()
+        });
+
+        currentSessionId = sessionId;
+        document.getElementById('display-class-name').innerText = className;
+        document.getElementById('display-class-code').innerText = code;
+        
+        startRealtimeListener(sessionId);
+        startStudentsListener(sessionId);
+        showScreen('panel');
+    } catch (e) {
+        console.error("Error: ", e);
+        alert("Error al conectar con Firebase.");
+    }
+};
+
+// Control de Pulsador
+document.getElementById('btn-activate-buzzer').onclick = async () => {
+    if (!currentSessionId) return;
+    await updateDoc(doc(db, "sessions", currentSessionId), {
+        active: true,
+        winner: null
+    });
+};
+
+document.getElementById('btn-reset-buzzer').onclick = async () => {
+    if (!currentSessionId) return;
+    await updateDoc(doc(db, "sessions", currentSessionId), {
+        active: false,
+        winner: null
+    });
+};
+
+// Control de Bloqueo de Clase
+document.getElementById('btn-lock-session').onclick = async () => {
+    if (!currentSessionId) return;
+    isLocked = !isLocked;
+    await updateDoc(doc(db, "sessions", currentSessionId), {
+        locked: isLocked
+    });
+};
+
+function startRealtimeListener(sessionId) {
+    onSnapshot(doc(db, "sessions", sessionId), (docSnap) => {
+        if (!docSnap.exists()) return;
+        const data = docSnap.data();
+        isLocked = data.locked;
+        updateUI(data);
+    });
+}
+
+function startStudentsListener(sessionId) {
+    const studentsRef = collection(db, "sessions", sessionId, "students");
+    onSnapshot(studentsRef, (querySnapshot) => {
+        const studentList = document.getElementById('student-list');
+        const studentCount = document.getElementById('student-count');
+        
+        studentList.innerHTML = "";
+        studentCount.innerText = querySnapshot.size;
+
+        if (querySnapshot.empty) {
+            studentList.innerHTML = '<span style="color: var(--text-muted); font-size: 0.8rem;">Esperando alumnos...</span>';
+            return;
+        }
+
+        querySnapshot.forEach((docSnap) => {
+            const student = docSnap.data();
+            const badge = document.createElement('span');
+            badge.className = "status-badge";
+            badge.style.cssText = `
+                background: rgba(255,255,255,0.1); 
+                font-size: 0.75rem; 
+                display: flex; 
+                align-items: center; 
+                gap: 0.5rem;
+                padding-right: 0.5rem;
+            `;
+            
+            badge.innerHTML = `
+                <span>${student.name}</span>
+                <div class="kick-btn" title="Expulsar">×</div>
+            `;
+
+            // Lógica para expulsar alumno mejorada
+            badge.querySelector('.kick-btn').onclick = async (e) => {
+                e.stopPropagation(); // Evitar comportamientos extraños
+                if (confirm(`¿Expulsar a ${student.name}?`)) {
+                    try {
+                        const studentDocRef = doc(db, "sessions", sessionId, "students", student.name);
+                        await deleteDoc(studentDocRef);
+                    } catch (err) {
+                        console.error("Error al expulsar:", err);
+                    }
+                }
+            };
+
+            studentList.appendChild(badge);
+        });
+    });
+}
+
+function updateUI(data) {
+    const statusBadge = document.getElementById('teacher-status-badge');
+    const winnerDisplay = document.getElementById('winner-display');
+    const btnActivate = document.getElementById('btn-activate-buzzer');
+    const btnLock = document.getElementById('btn-lock-session');
+
+    if (data.locked) {
+        btnLock.innerText = "ABRIR CLASE";
+        btnLock.style.background = "var(--danger)";
+        btnLock.style.color = "white";
+    } else {
+        btnLock.innerText = "CERRAR CLASE";
+        btnLock.style.background = "transparent";
+        btnLock.style.color = "var(--text-light)";
+    }
+
+    if (data.active) {
+        statusBadge.innerText = "¡PULSADOR ACTIVO!";
+        statusBadge.className = "status-badge status-active";
+        btnActivate.disabled = true;
+    } else {
+        statusBadge.innerText = data.winner ? "RONDA TERMINADA" : "ESPERANDO...";
+        statusBadge.className = data.winner ? "status-badge status-active" : "status-badge status-waiting";
+        btnActivate.disabled = false;
+    }
+
+    if (data.winner) {
+        winnerDisplay.classList.remove('hidden');
+        document.getElementById('winner-name').innerText = data.winner.name;
+    } else {
+        winnerDisplay.classList.add('hidden');
+    }
+}
