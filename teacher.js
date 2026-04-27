@@ -9,7 +9,9 @@ import {
     onSnapshot, 
     collection,
     writeBatch,
-    serverTimestamp 
+    serverTimestamp,
+    query,
+    where 
 } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 
@@ -30,6 +32,29 @@ function showScreen(screenId) {
     screens[screenId].classList.remove('hidden');
 }
 
+// Limpiar sesiones antiguas (más de 1 semana)
+async function cleanupOldSessions() {
+    try {
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        
+        const q = query(collection(db, "sessions"), where("createdAt", "<", oneWeekAgo));
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) return;
+
+        const batch = writeBatch(db);
+        snapshot.forEach((sessionDoc) => {
+            batch.delete(sessionDoc.ref);
+        });
+        
+        await batch.commit();
+        console.log(`Se han limpiado ${snapshot.size} sesiones antiguas.`);
+    } catch (e) {
+        console.error("Error al limpiar sesiones antiguas:", e);
+    }
+}
+
 // Crear Sesión
 document.getElementById('btn-create-session').onclick = async () => {
     const className = document.getElementById('input-class-name').value;
@@ -42,6 +67,9 @@ document.getElementById('btn-create-session').onclick = async () => {
     }
 
     try {
+        // Limpieza automática al crear nueva sesión
+        await cleanupOldSessions();
+
         const sessionId = code; 
         const sessionRef = doc(db, "sessions", sessionId);
 

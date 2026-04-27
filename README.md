@@ -16,6 +16,7 @@
   - Control de acceso (Cerrar/Abrir clase).
   - Gestión de lista (Expulsar individualmente o vaciar clase).
 - **Manual Integrado**: Botón de ayuda (?) con guía rápida en el panel del profesor.
+- **Mantenimiento Automático**: Eliminación automática de sesiones con más de una semana de antigüedad para optimizar la base de datos.
 - **Diseño de Vanguardia**: Estética *Glassmorphism* totalmente responsiva.
 
 ---
