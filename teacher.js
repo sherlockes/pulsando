@@ -67,8 +67,8 @@ document.getElementById('btn-create-session').onclick = async () => {
     }
 
     try {
-        // Limpieza automática al crear nueva sesión
-        await cleanupOldSessions();
+        // Limpieza automática en segundo plano para no bloquear
+        cleanupOldSessions(); 
 
         const sessionId = code; 
         const sessionRef = doc(db, "sessions", sessionId);
