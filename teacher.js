@@ -149,9 +149,11 @@ document.getElementById('btn-penalize-winner').onclick = async () => {
 };
 
 // Control de Ayuda
-document.getElementById('btn-help').onclick = () => {
-    document.getElementById('modal-help').classList.remove('hidden');
-};
+document.querySelectorAll('.help-btn-trigger').forEach(btn => {
+    btn.onclick = () => {
+        document.getElementById('modal-help').classList.remove('hidden');
+    };
+});
 
 document.getElementById('btn-close-help').onclick = () => {
     document.getElementById('modal-help').classList.add('hidden');

@@ -57,9 +57,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Botón de Ayuda -->
-        <div id="btn-help" class="help-btn" title="Ayuda">?</div>
-
         <!-- Modal de Ayuda Mejorado -->
         <div id="modal-help" class="modal-overlay hidden">
             <div class="modal-content" style="max-width: 500px;">
@@ -103,7 +100,10 @@
 
         <!-- Pantalla Crear Sesión -->
         <div id="screen-create-session" class="card">
-            <span class="profesor-label">Modo Profesor</span>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                <span class="profesor-label" style="margin: 0;">Modo Profesor</span>
+                <div class="help-btn-trigger help-btn" title="Ayuda" style="position: static; width: 20px; height: 20px; font-size: 0.75rem; background: var(--primary); border: none; cursor: pointer;">?</div>
+            </div>
             <h1>Nueva Clase</h1>
             <p class="subtitle">Configura tu clase en tiempo real</p>
             <div class="form-group">
@@ -125,7 +125,10 @@
         <!-- Panel de Control (Profesor) -->
         <div id="screen-teacher-panel" class="card hidden">
             <div id="teacher-info">
-                <span class="profesor-label">Modo Profesor</span>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                    <span class="profesor-label" style="margin: 0;">Modo Profesor</span>
+                    <div class="help-btn-trigger help-btn" title="Ayuda" style="position: static; width: 20px; height: 20px; font-size: 0.75rem; background: var(--primary); border: none; cursor: pointer;">?</div>
+                </div>
                 <h1 id="display-class-name">Clase</h1>
                 <p class="text-center">PIN: <strong id="display-class-code" style="color: var(--primary)">----</strong></p>
             </div>
