@@ -143,40 +143,6 @@ function startKickListener(sessionId, studentName) {
             console.error('Error during buzzer press', e);
         }
     };
-    if (!currentSessionId || penaltyActive) return;
-
-    const btn = document.getElementById('buzzer-button');
-    if (hasUserPenalty && !btn.classList.contains('active')) return;
-
-    const sessionRef = doc(db, "sessions", currentSessionId);
-    
-    try {
-        const docSnap = await getDoc(sessionRef);
-        const data = docSnap.data();
-
-        if (!data.active) {
-            applyPenalty();
-            return;
-        }
-
-        await runTransaction(db, async (transaction) => {
-            const tDoc = await transaction.get(sessionRef);
-            const tData = tDoc.data();
-            
-            if (tData.active && !tData.winner) {
-                transaction.update(sessionRef, {
-                    winner: { name: currentStudentName, timestamp: serverTimestamp() },
-                    active: false
-                });
-                
-                const studentRef = doc(db, "sessions", currentSessionId, "students", currentStudentName);
-                transaction.update(studentRef, { penalty: false });
-            }
-        });
-    } catch (e) {
-        console.error(e);
-    }
-};
 
 async function applyPenalty() {
     penaltyActive = true;
