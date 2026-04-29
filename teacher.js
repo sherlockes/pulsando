@@ -236,9 +236,11 @@ function startStudentsListener(sessionId) {
         querySnapshot.forEach((docSnap) => {
             const student = docSnap.data();
             
-            // FILTRO DE PRESENCIA: Solo mostrar si se ha visto en los últimos 60 segundos
+            // FILTRO DE PRESENCIA: Solo mostrar si se ha visto en los últimos 30 segundos
             const lastSeen = student.lastSeen ? student.lastSeen.toMillis() : 0;
-            if (now - lastSeen > 60000) {
+            const secondsSinceLastSeen = (now - lastSeen) / 1000;
+            
+            if (secondsSinceLastSeen > 30) {
                 unfocusedTracker.delete(student.name);
                 return; 
             }
@@ -274,8 +276,14 @@ function startStudentsListener(sessionId) {
                 ${student.penalty ? 'border: 1px solid #f59e0b;' : ''}
             `;
             
+            // Determinar color del punto (Verde: Online+Foco, Amarillo: Online+Distraído, Gris: Offline)
+            let dotColor = "#64748b"; // Gris por defecto (offline)
+            if (secondsSinceLastSeen < 25) {
+                dotColor = (student.focused !== false) ? "#10b981" : "#f59e0b";
+            }
+
             badge.innerHTML = `
-                <div style="width: 6px; height: 6px; border-radius: 50%; background: ${student.focused !== false ? '#10b981' : '#f59e0b'}; transition: background 0.3s;"></div>
+                <div style="width: 6px; height: 6px; border-radius: 50%; background: ${dotColor}; transition: background 0.3s;"></div>
                 <span>${student.penalty ? '<span class="penalty-tag">⚡</span>' : ''}${student.name}</span>
                 <div class="kick-btn" title="Expulsar">×</div>
             `;
