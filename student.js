@@ -136,13 +136,10 @@ function startKickListener(sessionId, studentName) {
         }
         
         const buzzerBtn = document.getElementById('buzzer-button');
-        const originalText = buzzerBtn.innerText;
-        buzzerBtn.innerText = "PROCESANDO...";
         buzzerBtn.disabled = true;
 
         if (hasUserPenalty && !buzzerBtn.classList.contains('active')) {
             console.log('Ignored: User has penalty and button not active');
-            buzzerBtn.innerText = originalText;
             buzzerBtn.disabled = false;
             return;
         }
@@ -201,9 +198,7 @@ function startKickListener(sessionId, studentName) {
             buzzerBtn.innerText = "¡GANASTE!";
             buzzerBtn.style.background = "var(--secondary)";
         } catch (e) {
-            console.error('Error during buzzer press:', e);
-            alert('Error al pulsar: ' + (e.message || e));
-            buzzerBtn.innerText = originalText;
+            console.error("Error en transacción:", e);
             buzzerBtn.disabled = false;
         }
     });
@@ -263,6 +258,14 @@ function updateUI(data) {
     buzzerBtn.innerText = "PULSAR";
     buzzerBtn.style.background = "";
     buzzerBtn.disabled = false;
+
+    if (data.countdown && data.countdown > 0) {
+        statusBadge.innerText = "¡PREPÁRATE!";
+        statusBadge.className = "status-badge status-active";
+        buzzerBtn.innerText = data.countdown;
+        buzzerBtn.classList.remove('active');
+        return;
+    }
 
     if (data.active) {
         if (hasUserPenalty) {

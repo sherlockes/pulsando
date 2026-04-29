@@ -73,6 +73,7 @@
                     <h3>🎮 Dinámica de Juego</h3>
                     <ul>
                         <li><b>ACTIVAR</b>: Pone los botones de los alumnos en ROJO. El primero que pulse gana.</li>
+                        <li><b>CUENTA ATRÁS</b>: Activación automática tras 5s (ideal para máxima justicia).</li>
                         <li><b>REINICIAR</b>: Apaga los botones y limpia el ganador para una nueva pregunta.</li>
                     </ul>
                 </div>
@@ -91,6 +92,8 @@
                         <li>🟢 <b>ACTIVO</b>: El alumno tiene la pestaña abierta y al frente.</li>
                         <li>🟡 <b>DISTRAÍDO</b>: El alumno está en otra pestaña o ventana.</li>
                         <li><b>NO VAGOS</b>: Si lo activas, el sistema expulsa automáticamente a quien esté más de 1 min en amarillo.</li>
+                        <li><b>CERRAR</b>: Bloquea el acceso para que no puedan entrar más alumnos.</li>
+                        <li><b>VACIAR</b>: Expulsa a todos los alumnos actuales de la lista.</li>
                     </ul>
                 </div>
 
@@ -170,7 +173,10 @@
                 </div>
 
                 <div class="mt-4">
-                    <button id="btn-activate-buzzer" class="btn btn-secondary">ACTIVAR PULSADOR</button>
+                    <div class="form-row">
+                        <button id="btn-activate-buzzer" class="btn btn-secondary">ACTIVAR</button>
+                        <button id="btn-surprise-mode" class="btn btn-primary">CUENTA ATRÁS</button>
+                    </div>
                     <button id="btn-reset-buzzer" class="btn btn-danger">REINICIAR</button>
                 </div>
             </div>

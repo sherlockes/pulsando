@@ -8,6 +8,9 @@
 
 - **Doble Interfaz**: Vistas optimizadas para Alumno (`index.html`) y Profesor (`teacher.html`).
 - **Tiempo Real**: Sincronización instantánea mediante Firebase Firestore.
+- **Modos de Activación**: 
+  - **Manual**: El profesor activa el pulsador al instante.
+  - **Cuenta Atrás**: Activación automática tras 5 segundos sincronizados.
 - **Justicia de Juego (Anti-Cheat)**: 
   - **Penalización por Ansia**: Bloqueo automático (2-5s) si se pulsa antes de tiempo.
   - **Penalización por Error (⚡)**: El profesor puede retrasar 1s el botón de un alumno si contestó mal.
@@ -71,11 +74,23 @@ Copia estas reglas en tu consola de Firebase para asegurar el funcionamiento:
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Reglas para las Sesiones
     match /sessions/{sessionId} {
-      allow read, create, update: if true;
+      // Permite leer, crear y actualizar (para pulsar y unirse)
+      // Permite borrar (para la limpieza automática de sesiones antiguas)
+      allow read, create, update, delete: if true;
+      
+      // Reglas para los Alumnos dentro de una sesión
       match /students/{studentName} {
-        allow read, create, delete: if true;
+        // Permite todo: unirse (create), latido (update), expulsar (delete) y ver lista (read)
+        allow read, write: if true;
       }
+    }
+    
+    // Bloquea cualquier otra colección por seguridad
+    match /{path=**} {
+      allow read, write: if false;
     }
   }
 }

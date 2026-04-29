@@ -125,8 +125,35 @@ document.getElementById('btn-reset-buzzer').onclick = async () => {
     if (!currentSessionId) return;
     await updateDoc(doc(db, "sessions", currentSessionId), {
         active: false,
-        winner: null
+        winner: null,
+        countdown: null
     });
+};
+
+// Modo Sorpresa (Cuenta atrás)
+document.getElementById('btn-surprise-mode').onclick = async () => {
+    if (!currentSessionId) return;
+    
+    let count = 5;
+    const sessionRef = doc(db, "sessions", currentSessionId);
+    
+    // Bloqueo inmediato de botones
+    document.getElementById('btn-surprise-mode').disabled = true;
+    document.getElementById('btn-activate-buzzer').disabled = true;
+
+    const interval = setInterval(async () => {
+        if (count > 0) {
+            await updateDoc(sessionRef, { countdown: count });
+            count--;
+        } else {
+            clearInterval(interval);
+            await updateDoc(sessionRef, { 
+                active: true, 
+                winner: null, 
+                countdown: null 
+            });
+        }
+    }, 1000);
 };
 
 // Control de Bloqueo
@@ -275,6 +302,7 @@ function updateUI(data) {
     const statusBadge = document.getElementById('teacher-status-badge');
     const winnerDisplay = document.getElementById('winner-display');
     const btnActivate = document.getElementById('btn-activate-buzzer');
+    const btnSurprise = document.getElementById('btn-surprise-mode');
     const btnLock = document.getElementById('btn-lock-session');
 
     if (data.locked) {
@@ -286,14 +314,16 @@ function updateUI(data) {
         btnLock.style.color = "var(--text-light)";
     }
 
-    if (data.active) {
-        statusBadge.innerText = "¡PULSADOR ACTIVO!";
+    if (data.active || (data.countdown && data.countdown > 0)) {
+        statusBadge.innerText = data.active ? "¡PULSADOR ACTIVO!" : `PREPARANDO... (${data.countdown})`;
         statusBadge.className = "status-badge status-active";
         btnActivate.disabled = true;
+        btnSurprise.disabled = true;
     } else {
         statusBadge.innerText = data.winner ? "RONDA TERMINADA" : "ESPERANDO...";
         statusBadge.className = data.winner ? "status-badge status-active" : "status-badge status-waiting";
         btnActivate.disabled = false;
+        btnSurprise.disabled = false;
     }
 
     if (data.winner) {
