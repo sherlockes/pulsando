@@ -22,6 +22,19 @@ let studentDocListener = null;
 let heartbeatInterval = null;
 let isFocused = true;
 
+// Detección de foco mejorada para PWA/Móvil
+document.addEventListener('visibilitychange', () => {
+    isFocused = document.visibilityState === 'visible';
+    // Si estamos en medio de una sesión, avisamos al profesor al instante
+    if (currentSessionId && currentStudentName) {
+        const studentRef = doc(db, "sessions", currentSessionId, "students", currentStudentName);
+        updateDoc(studentRef, { 
+            focused: isFocused,
+            lastSeen: serverTimestamp() 
+        }).catch(e => console.log("Error actualizando visibilidad:", e));
+    }
+});
+
 window.addEventListener('focus', () => { isFocused = true; });
 window.addEventListener('blur', () => { isFocused = false; });
 
