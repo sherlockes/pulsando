@@ -42,14 +42,17 @@ function showScreen(screenId) {
 
 // Unirse a Clase
 document.getElementById('btn-join-session').onclick = async () => {
-    console.log('Join button clicked');
-    alert('Intentando entrar...');
     const className = document.getElementById('input-join-class').value.trim();
     const name = document.getElementById('input-student-name').value.trim();
     const code = document.getElementById('input-join-code').value.trim();
 
     if (!name || !code || !className) {
         alert("Por favor, rellena todos los campos.");
+        return;
+    }
+
+    if (name.length > 10) {
+        alert("El nombre no puede tener más de 10 letras.");
         return;
     }
 
@@ -123,9 +126,6 @@ function startKickListener(sessionId, studentName) {
 // Acción de Pulsar
     // Acción de Pulsar
     document.getElementById('buzzer-button').addEventListener('click', async () => {
-        console.log('Buzzer button clicked! currentStudentName:', currentStudentName);
-        alert('Botón pulsado detectado');
-        
         if (!currentSessionId) {
             console.log('Ignored: No currentSessionId');
             return;
@@ -149,7 +149,6 @@ function startKickListener(sessionId, studentName) {
 
         const sessionRef = doc(db, "sessions", currentSessionId);
         try {
-            console.log('Fetching session doc for session:', currentSessionId);
             const docSnap = await getDoc(sessionRef);
             if (!docSnap.exists()) {
                 alert('La sesión ya no existe.');

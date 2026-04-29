@@ -118,13 +118,15 @@
                 <label for="input-class-name">Nombre de la Clase</label>
                 <input type="text" id="input-class-name" placeholder="Ej: Matemáticas 4ºA">
             </div>
-            <div class="form-group">
-                <label for="input-class-code">PIN de Acceso (4 dígitos)</label>
-                <input type="text" id="input-class-code" maxlength="4" placeholder="Ej: 1234">
-            </div>
-            <div class="form-group">
-                <label for="input-max-students">Máximo de Alumnos</label>
-                <input type="number" id="input-max-students" value="30">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="input-class-code">PIN (4 dígitos)</label>
+                    <input type="text" id="input-class-code" maxlength="4" placeholder="Ej: 1234">
+                </div>
+                <div class="form-group" style="flex: 0 0 100px;">
+                    <label for="input-max-students">Máx. Alumnos</label>
+                    <input type="number" id="input-max-students" value="30">
+                </div>
             </div>
             <button id="btn-create-session" class="btn btn-primary">Empezar Sesión</button>
             <a href="./index.html" class="btn btn-outline">Ir a vista Alumno</a>

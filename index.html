@@ -19,13 +19,15 @@
                 <label for="input-join-class">Nombre de la Clase</label>
                 <input type="text" id="input-join-class" placeholder="Ej: Matemáticas">
             </div>
-            <div class="form-group">
-                <label for="input-student-name">Tu Nombre</label>
-                <input type="text" id="input-student-name" placeholder="Tu nombre">
-            </div>
-            <div class="form-group">
-                <label for="input-join-code">PIN de la Clase</label>
-                <input type="text" id="input-join-code" maxlength="4" placeholder="4 dígitos">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="input-student-name">Tu Nombre</label>
+                    <input type="text" id="input-student-name" maxlength="10" placeholder="Máx 10">
+                </div>
+                <div class="form-group" style="flex: 0 0 100px;">
+                    <label for="input-join-code">PIN</label>
+                    <input type="text" id="input-join-code" maxlength="4" placeholder="PIN">
+                </div>
             </div>
             <button id="btn-join-session" class="btn btn-secondary">Entrar a Clase</button>
             <div class="text-center mt-4">

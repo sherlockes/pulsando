@@ -73,9 +73,21 @@ p.subtitle {
 /* Inputs */
 .form-group {
     margin-bottom: 1.5rem;
+    text-align: left;
 }
 
-label {
+.form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.form-group label {
     display: block;
     font-size: 0.85rem;
     font-weight: 600;

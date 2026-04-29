@@ -140,8 +140,6 @@ document.getElementById('btn-lock-session').onclick = async () => {
 
 // Vaciar Clase
 document.getElementById('btn-clear-session').onclick = async () => {
-    console.log('Clear session clicked');
-    alert('Boton vaciar pulsado');
     if (!currentSessionId || !confirm("¿Seguro que quieres expulsar a TODOS los alumnos?")) return;
     
     const studentsRef = collection(db, "sessions", currentSessionId, "students");
@@ -185,7 +183,6 @@ function startRealtimeListener(sessionId) {
     onSnapshot(doc(db, "sessions", sessionId), (docSnap) => {
         if (!docSnap.exists()) return;
         const data = docSnap.data();
-        console.log('TEACHER RECEIVED UPDATE:', data);
         isLocked = data.locked;
         lastWinnerName = data.winner ? data.winner.name : null;
         updateUI(data);
