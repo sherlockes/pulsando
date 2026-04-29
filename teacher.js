@@ -301,8 +301,8 @@ function startStudentsListener(sessionId) {
 function updateUI(data) {
     const statusBadge = document.getElementById('teacher-status-badge');
     const winnerDisplay = document.getElementById('winner-display');
-    const btnActivate = document.getElementById('btn-activate-buzzer');
-    const btnSurprise = document.getElementById('btn-surprise-mode');
+    const activationControls = document.getElementById('activation-controls');
+    const btnReset = document.getElementById('btn-reset-buzzer');
     const btnLock = document.getElementById('btn-lock-session');
 
     if (data.locked) {
@@ -314,16 +314,23 @@ function updateUI(data) {
         btnLock.style.color = "var(--text-light)";
     }
 
-    if (data.active || (data.countdown && data.countdown > 0)) {
-        statusBadge.innerText = data.active ? "¡PULSADOR ACTIVO!" : `PREPARANDO... (${data.countdown})`;
+    const inProgress = data.active || (data.countdown && data.countdown > 0) || data.winner;
+
+    if (inProgress) {
+        statusBadge.innerText = data.active ? "¡PULSADOR ACTIVO!" : 
+                                (data.countdown > 0 ? `PREPARANDO... (${data.countdown})` : "RONDA TERMINADA");
         statusBadge.className = "status-badge status-active";
-        btnActivate.disabled = true;
-        btnSurprise.disabled = true;
+        activationControls.classList.add('hidden');
+        btnReset.classList.remove('hidden');
     } else {
-        statusBadge.innerText = data.winner ? "RONDA TERMINADA" : "ESPERANDO...";
-        statusBadge.className = data.winner ? "status-badge status-active" : "status-badge status-waiting";
-        btnActivate.disabled = false;
-        btnSurprise.disabled = false;
+        statusBadge.innerText = "ESPERANDO...";
+        statusBadge.className = "status-badge status-waiting";
+        activationControls.classList.remove('hidden');
+        btnReset.classList.add('hidden');
+        
+        // Asegurar que los botones estén habilitados al volver de una cuenta atrás
+        document.getElementById('btn-activate-buzzer').disabled = false;
+        document.getElementById('btn-surprise-mode').disabled = false;
     }
 
     if (data.winner) {

@@ -292,11 +292,13 @@ function updateUI(data) {
     }
 
     if (data.winner) {
+        buzzerBtn.classList.add('hidden'); // Ocultar botón si hay ganador
         winnerMsg.classList.remove('hidden');
         const displayWinner = document.getElementById('student-winner-name');
         displayWinner.innerText = data.winner.name;
         displayWinner.style.color = (data.winner.name === currentStudentName) ? "#10b981" : "#f87171";
     } else {
+        buzzerBtn.classList.remove('hidden'); // Mostrar botón si no hay ganador
         winnerMsg.classList.add('hidden');
     }
 }
