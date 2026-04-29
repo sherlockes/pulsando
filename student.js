@@ -19,6 +19,16 @@ let currentStudentName = "";
 let penaltyActive = false; // Bloqueo por pulsar antes de tiempo
 let hasUserPenalty = false; // Penalización por respuesta anterior incorrecta
 let studentDocListener = null;
+let heartbeatInterval = null;
+let isFocused = true;
+
+window.addEventListener('focus', () => { isFocused = true; });
+window.addEventListener('blur', () => { isFocused = false; });
+
+window.onerror = (msg, url, line, col, error) => {
+    alert(`Error Global (Alumno): ${msg}\nEn ${url}:${line}`);
+    return false;
+};
 
 const screens = {
     join: document.getElementById('screen-join-session'),
@@ -32,9 +42,11 @@ function showScreen(screenId) {
 
 // Unirse a Clase
 document.getElementById('btn-join-session').onclick = async () => {
-    const className = document.getElementById('input-join-class').value;
-    const name = document.getElementById('input-student-name').value;
-    const code = document.getElementById('input-join-code').value;
+    console.log('Join button clicked');
+    alert('Intentando entrar...');
+    const className = document.getElementById('input-join-class').value.trim();
+    const name = document.getElementById('input-student-name').value.trim();
+    const code = document.getElementById('input-join-code').value.trim();
 
     if (!name || !code || !className) {
         alert("Por favor, rellena todos los campos.");
@@ -49,8 +61,7 @@ document.getElementById('btn-join-session').onclick = async () => {
         if (sessionSnap.data().locked) throw "SESSION_LOCKED";
         if (sessionSnap.data().className.toLowerCase() !== className.toLowerCase()) throw "CLASS_NAME_MISMATCH";
 
-        startKickListener(code, name);
-
+        // Intentamos unirnos
         await runTransaction(db, async (transaction) => {
             const currentSnap = await transaction.get(sessionRef);
             const data = currentSnap.data();
@@ -65,6 +76,8 @@ document.getElementById('btn-join-session').onclick = async () => {
             transaction.set(studentRef, {
                 name: name,
                 joinedAt: serverTimestamp(),
+                lastSeen: serverTimestamp(),
+                focused: true,
                 penalty: false
             });
 
@@ -73,9 +86,14 @@ document.getElementById('btn-join-session').onclick = async () => {
 
         currentSessionId = code;
         currentStudentName = name;
+        sessionStorage.setItem('currentStudentName', name);
+        sessionStorage.setItem('currentSessionId', code);
+        
         document.getElementById('student-display-name').innerText = name;
 
         startRealtimeListener(code);
+        startKickListener(code, name); // Escuchar expulsión solo DESPUÉS de entrar
+        startHeartbeat(code, name);
         showScreen('buzzer');
     } catch (e) {
         if (studentDocListener) studentDocListener();
@@ -104,45 +122,92 @@ function startKickListener(sessionId, studentName) {
 
 // Acción de Pulsar
     // Acción de Pulsar
-    document.getElementById('buzzer-button').onclick = async () => {
-        console.log('Buzzer button clicked');
-        if (!currentSessionId || penaltyActive) {
-            console.log('Ignored: No session or penalty active');
+    document.getElementById('buzzer-button').addEventListener('click', async () => {
+        console.log('Buzzer button clicked! currentStudentName:', currentStudentName);
+        alert('Botón pulsado detectado');
+        
+        if (!currentSessionId) {
+            console.log('Ignored: No currentSessionId');
             return;
         }
-        const btn = document.getElementById('buzzer-button');
-        if (hasUserPenalty && !btn.classList.contains('active')) {
+        if (penaltyActive) {
+            console.log('Ignored: Penalty is active');
+            return;
+        }
+        
+        const buzzerBtn = document.getElementById('buzzer-button');
+        const originalText = buzzerBtn.innerText;
+        buzzerBtn.innerText = "PROCESANDO...";
+        buzzerBtn.disabled = true;
+
+        if (hasUserPenalty && !buzzerBtn.classList.contains('active')) {
             console.log('Ignored: User has penalty and button not active');
+            buzzerBtn.innerText = originalText;
+            buzzerBtn.disabled = false;
             return;
         }
+
         const sessionRef = doc(db, "sessions", currentSessionId);
         try {
+            console.log('Fetching session doc for session:', currentSessionId);
             const docSnap = await getDoc(sessionRef);
+            if (!docSnap.exists()) {
+                alert('La sesión ya no existe.');
+                buzzerBtn.innerText = originalText;
+                buzzerBtn.disabled = false;
+                return;
+            }
             const data = docSnap.data();
-            console.log('Session data before press', data);
+            console.log('Session data before press:', data);
+            
             if (!data.active) {
                 console.log('Session not active, applying penalty');
                 applyPenalty();
+                buzzerBtn.innerText = originalText;
+                buzzerBtn.disabled = false;
                 return;
             }
+
             await runTransaction(db, async (transaction) => {
                 const tDoc = await transaction.get(sessionRef);
                 const tData = tDoc.data();
-                console.log('Transaction read data', tData);
-                if (tData.active && !tData.winner) {
+                
+                // Si no tenemos el nombre en memoria, intentamos recuperarlo
+                if (!currentStudentName) {
+                    currentStudentName = sessionStorage.getItem('currentStudentName') || "Anónimo";
+                }
+
+                console.log('Transaction check - Active:', tData.active, 'Winner:', tData.winner);
+                
+                // Condición: Que esté activo y que no haya ganador aún
+                if (tData.active && (!tData.winner || tData.winner === null)) {
+                    console.log('Updating Firestore with winner:', currentStudentName);
+                    
                     transaction.update(sessionRef, {
-                        winner: { name: currentStudentName, timestamp: serverTimestamp() },
+                        winner: { 
+                            name: currentStudentName, 
+                            timestamp: serverTimestamp() 
+                        },
                         active: false
                     });
-                    console.log('Winner set, session deactivated');
+                    
                     const studentRef = doc(db, "sessions", currentSessionId, "students", currentStudentName);
                     transaction.update(studentRef, { penalty: false });
+                    console.log('Transaction commit sent');
+                } else {
+                    throw "NOT_ACTIVE_OR_ALREADY_WON";
                 }
             });
+            console.log('Transaction success');
+            buzzerBtn.innerText = "¡GANASTE!";
+            buzzerBtn.style.background = "var(--secondary)";
         } catch (e) {
-            console.error('Error during buzzer press', e);
+            console.error('Error during buzzer press:', e);
+            alert('Error al pulsar: ' + (e.message || e));
+            buzzerBtn.innerText = originalText;
+            buzzerBtn.disabled = false;
         }
-    };
+    });
 
 async function applyPenalty() {
     penaltyActive = true;
@@ -163,6 +228,24 @@ async function applyPenalty() {
     }, penaltyTime);
 }
 
+function startHeartbeat(sessionId, studentName) {
+    if (heartbeatInterval) clearInterval(heartbeatInterval);
+    const studentRef = doc(db, "sessions", sessionId, "students", studentName);
+    
+    heartbeatInterval = setInterval(async () => {
+        try {
+            await updateDoc(studentRef, { 
+                lastSeen: serverTimestamp(),
+                focused: isFocused 
+            });
+        } catch (e) {
+            console.error("Error en el latido de presencia:", e);
+            // Si el documento ya no existe (expulsado), paramos el latido
+            if (e.code === 'not-found') clearInterval(heartbeatInterval);
+        }
+    }, 20000); // Cada 20 segundos
+}
+
 function startRealtimeListener(sessionId) {
     onSnapshot(doc(db, "sessions", sessionId), (docSnap) => {
         if (!docSnap.exists()) return;
@@ -176,6 +259,11 @@ function updateUI(data) {
     const winnerMsg = document.getElementById('student-winner-msg');
 
     if (penaltyActive) return;
+
+    // Resetear visuales del botón por si venimos de una victoria anterior
+    buzzerBtn.innerText = "PULSAR";
+    buzzerBtn.style.background = "";
+    buzzerBtn.disabled = false;
 
     if (data.active) {
         if (hasUserPenalty) {

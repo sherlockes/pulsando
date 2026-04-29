@@ -53,6 +53,13 @@
             color: var(--secondary);
             margin-bottom: 0.5rem;
         }
+        /* Estilo para el botón No Vagos */
+        .btn-vagos-active {
+            background: rgba(239, 68, 68, 0.2) !important;
+            border-color: #ef4444 !important;
+            color: white !important;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -79,18 +86,19 @@
                 </div>
 
                 <div class="help-section">
-                    <h3>👥 Gestión de Alumnos</h3>
+                    <h3>👥 Gestión y Presencia</h3>
                     <ul>
-                        <li><b>CERRAR</b>: Nadie más podrá unirse (útil si ya están todos).</li>
-                        <li><b>VACIAR</b>: Expulsa a todos para empezar con un grupo nuevo.</li>
-                        <li><b>EXPULSAR (×)</b>: Saca a un alumno individualmente si se porta mal.</li>
+                        <li>🟢 <b>ACTIVO</b>: El alumno tiene la pestaña abierta y al frente.</li>
+                        <li>🟡 <b>DISTRAÍDO</b>: El alumno está en otra pestaña o ventana.</li>
+                        <li><b>NO VAGOS</b>: Si lo activas, el sistema expulsa automáticamente a quien esté más de 1 min en amarillo.</li>
                     </ul>
                 </div>
 
                 <div class="help-section">
                     <h3>🧹 Mantenimiento</h3>
                     <ul>
-                        <li><b>Limpieza automática</b>: Cada vez que creas una clase, el sistema borra las sesiones de hace más de una semana para ahorrar espacio.</li>
+                        <li><b>Limpieza de inicio</b>: Al crear la clase, se borran los alumnos de sesiones anteriores con ese PIN.</li>
+                        <li><b>Limpieza semanal</b>: El sistema borra sesiones de más de una semana automáticamente.</li>
                     </ul>
                 </div>
 
@@ -137,7 +145,8 @@
             <div class="mt-4" style="background: rgba(0,0,0,0.2); border-radius: 1rem; padding: 1rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <p style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin: 0;">ALUMNOS (<span id="student-count">0</span>)</p>
-                    <div style="display: flex; gap: 0.5rem;">
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <button id="btn-vagos-toggle" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.7rem; margin: 0; width: auto;">NO VAGOS</button>
                         <button id="btn-lock-session" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.7rem; margin: 0; width: auto;">CERRAR</button>
                         <button id="btn-clear-session" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.7rem; margin: 0; width: auto; border-color: var(--danger); color: var(--danger);">VACIAR</button>
                     </div>

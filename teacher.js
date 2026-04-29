@@ -21,6 +21,12 @@ const db = getFirestore(app);
 let currentSessionId = null;
 let isLocked = false;
 let lastWinnerName = null;
+const unfocusedTracker = new Map(); // Seguimiento de alumnos distraídos (nombre -> timestamp)
+
+window.onerror = (msg, url, line, col, error) => {
+    alert(`Error Global (Profesor): ${msg}\nEn ${url}:${line}`);
+    return false;
+};
 
 const screens = {
     create: document.getElementById('screen-create-session'),
@@ -72,6 +78,15 @@ document.getElementById('btn-create-session').onclick = async () => {
 
         const sessionId = code; 
         const sessionRef = doc(db, "sessions", sessionId);
+
+        // Limpiar alumnos previos para evitar "fantasmas" de otras sesiones
+        const studentsRef = collection(db, "sessions", sessionId, "students");
+        const studentsSnap = await getDocs(studentsRef);
+        if (!studentsSnap.empty) {
+            const batch = writeBatch(db);
+            studentsSnap.forEach(d => batch.delete(d.ref));
+            await batch.commit();
+        }
 
         await setDoc(sessionRef, {
             className,
@@ -125,6 +140,8 @@ document.getElementById('btn-lock-session').onclick = async () => {
 
 // Vaciar Clase
 document.getElementById('btn-clear-session').onclick = async () => {
+    console.log('Clear session clicked');
+    alert('Boton vaciar pulsado');
     if (!currentSessionId || !confirm("¿Seguro que quieres expulsar a TODOS los alumnos?")) return;
     
     const studentsRef = collection(db, "sessions", currentSessionId, "students");
@@ -159,10 +176,16 @@ document.getElementById('btn-close-help').onclick = () => {
     document.getElementById('modal-help').classList.add('hidden');
 };
 
+// Botón No Vagos Toggle
+document.getElementById('btn-vagos-toggle').onclick = (e) => {
+    e.target.classList.toggle('btn-vagos-active');
+};
+
 function startRealtimeListener(sessionId) {
     onSnapshot(doc(db, "sessions", sessionId), (docSnap) => {
         if (!docSnap.exists()) return;
         const data = docSnap.data();
+        console.log('TEACHER RECEIVED UPDATE:', data);
         isLocked = data.locked;
         lastWinnerName = data.winner ? data.winner.name : null;
         updateUI(data);
@@ -183,8 +206,38 @@ function startStudentsListener(sessionId) {
             return;
         }
 
+        const now = Date.now();
+        let activeCount = 0;
+
         querySnapshot.forEach((docSnap) => {
             const student = docSnap.data();
+            
+            // FILTRO DE PRESENCIA: Solo mostrar si se ha visto en los últimos 60 segundos
+            const lastSeen = student.lastSeen ? student.lastSeen.toMillis() : 0;
+            if (now - lastSeen > 60000) {
+                unfocusedTracker.delete(student.name);
+                return; 
+            }
+
+            // LÓGICA DE AUTO-EXPULSIÓN POR DISTRACCIÓN
+            if (student.focused === false) {
+                if (!unfocusedTracker.has(student.name)) {
+                    unfocusedTracker.set(student.name, now);
+                } else {
+                    const distractedTime = now - unfocusedTracker.get(student.name);
+                    const autoKickEnabled = document.getElementById('btn-vagos-toggle').classList.contains('btn-vagos-active');
+                    if (autoKickEnabled && distractedTime > 60000) {
+                        console.log(`Auto-expulsando a ${student.name} por distracción (${Math.round(distractedTime/1000)}s)`);
+                        deleteDoc(doc(db, "sessions", sessionId, "students", student.name));
+                        unfocusedTracker.delete(student.name);
+                        return; 
+                    }
+                }
+            } else {
+                unfocusedTracker.delete(student.name);
+            }
+
+            activeCount++;
             const badge = document.createElement('span');
             badge.className = "status-badge";
             badge.style.cssText = `
@@ -198,6 +251,7 @@ function startStudentsListener(sessionId) {
             `;
             
             badge.innerHTML = `
+                <div style="width: 6px; height: 6px; border-radius: 50%; background: ${student.focused !== false ? '#10b981' : '#f59e0b'}; transition: background 0.3s;"></div>
                 <span>${student.penalty ? '<span class="penalty-tag">⚡</span>' : ''}${student.name}</span>
                 <div class="kick-btn" title="Expulsar">×</div>
             `;
@@ -211,6 +265,12 @@ function startStudentsListener(sessionId) {
 
             studentList.appendChild(badge);
         });
+        
+        studentCount.innerText = activeCount;
+
+        if (activeCount === 0) {
+            studentList.innerHTML = '<span style="color: var(--text-muted); font-size: 0.8rem;">Esperando alumnos...</span>';
+        }
     });
 }
 

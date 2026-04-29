@@ -1,0 +1,16 @@
+
+> pulsando@1.0.0 dev
+> vite
+
+
+  VITE v8.0.10  ready in 108 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+17:10:40 [vite] (client) page reload student.js
+17:10:47 [vite] (client) page reload teacher.js
+17:12:04 [vite] (client) [console.warn] [2026-04-28T15:12:04.469Z]  @firebase/firestore: Firestore (9.22.1): RestConnection RPC 'Commit' 0x1634b3c9 failed with error:  {"code":"permission-denied","name":"FirebaseError"} url:  https://firestore.googleapis.com/v1/projects/pulsando-a7dbd/databases/(default)/documents:commit request: {"writes":[{"update":{"name":"projects/pulsando-a7dbd/databases/(default)/documents/sessions/1234","fields":{"winner":{"mapValue":{"fields":{"name":{"stringValue":"Nino"}}}},"active":{"booleanValue":false}}},"updateMask":{"fieldPaths":["active","winner"]},"updateTransforms":[{"fieldPath":"winner.timestamp","setToServerValue":"REQUEST_TIME"}],"currentDocument":{"updateTime":"2026-04-28T15:11:59.836425000Z"}},{"update":{"name":"projects/pulsando-a7dbd/databases/(default)/documents/sessions/1234/students/Nino","fields":{"penalty":{"booleanValue":false}}},"updateMask":{"fieldPaths":["penalty"]},"currentDocument":{"exists":true}}]}
+17:12:04 [vite] (client) [console.error] Error during buzzer press: FirebaseError: Missing or insufficient permissions.
+17:13:41 [vite] (client) page reload student.js
+17:15:39 [vite] (client) [console.warn] [2026-04-28T15:15:39.756Z]  @firebase/firestore: Firestore (9.22.1): RestConnection RPC 'Commit' 0x4027fd66 failed with error:  {"code":"permission-denied","name":"FirebaseError"} url:  https://firestore.googleapis.com/v1/projects/pulsando-a7dbd/databases/(default)/documents:commit request: {"writes":[{"update":{"name":"projects/pulsando-a7dbd/databases/(default)/documents/sessions/1234","fields":{"winner":{"mapValue":{"fields":{"name":{"stringValue":"pp"}}}},"active":{"booleanValue":false}}},"updateMask":{"fieldPaths":["active","winner"]},"updateTransforms":[{"fieldPath":"winner.timestamp","setToServerValue":"REQUEST_TIME"}],"currentDocument":{"updateTime":"2026-04-28T15:15:35.983368000Z"}},{"update":{"name":"projects/pulsando-a7dbd/databases/(default)/documents/sessions/1234/students/pp","fields":{"penalty":{"booleanValue":false}}},"updateMask":{"fieldPaths":["penalty"]},"currentDocument":{"exists":true}}]}
+17:15:39 [vite] (client) [console.error] Error during buzzer press: FirebaseError: Missing or insufficient permissions.

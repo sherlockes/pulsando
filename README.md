@@ -11,12 +11,13 @@
 - **Justicia de Juego (Anti-Cheat)**: 
   - **Penalización por Ansia**: Bloqueo automático (2-5s) si se pulsa antes de tiempo.
   - **Penalización por Error (⚡)**: El profesor puede retrasar 1s el botón de un alumno si contestó mal.
-- **Control Total del Docente**:
-  - Gestión de sesiones mediante PIN de 4 dígitos.
-  - Control de acceso (Cerrar/Abrir clase).
-  - Gestión de lista (Expulsar individualmente o vaciar clase).
-- **Manual Integrado**: Botón de ayuda (?) con guía rápida en el panel del profesor.
-- **Mantenimiento Automático**: Eliminación automática de sesiones con más de una semana de antigüedad para optimizar la base de datos.
+- **Presencia en Tiempo Real**: 
+  - **Indicadores de Estado**: 🟢 (Activo), 🟡 (Distraído/Segundo plano), ⚪ (Desconectado).
+  - **Filtro Automático**: La lista solo muestra alumnos que están realmente en la sesión.
+- **Modo NO VAGOS**: El profesor puede activar la expulsión automática de alumnos que pasen más de 1 minuto distraídos.
+- **Mantenimiento Automático**: 
+  - Limpieza de alumnos antiguos al iniciar sesión con un PIN reutilizado.
+  - Eliminación de sesiones con más de una semana de antigüedad.
 - **Diseño de Vanguardia**: Estética *Glassmorphism* totalmente responsiva.
 
 ---
